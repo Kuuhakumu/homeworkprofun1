@@ -63,7 +63,39 @@ int ensure_csv_has_header(void) {
 }
 
 int load_csv() {
+    txn_count = 0;
+    FILE *f = fopen(FILE_NAME, "r");
+    if (!f) { perror("open csv"); return 0; }
 
+    char line[512];
+
+    if (!fgets(line, sizeof(line), f)) { fclose(f); return 1; }
+
+    while (fgets(line, sizeof(line), f)) {
+        if (txn_count >= MAX_TXNS) { printf("เต็มความจุ array\n"); break; }
+
+        char *token;
+        token = strtok(line, ",");               if (!token) continue;
+        strncpy(accounts[txn_count], token, MAX_ACC-1);
+        accounts[txn_count][MAX_ACC-1] = '\0';
+
+        token = strtok(NULL, ",");               if (!token) continue;
+        strncpy(types[txn_count], token, MAX_TYPE-1);
+        types[txn_count][MAX_TYPE-1] = '\0';
+
+        token = strtok(NULL, ",");               if (!token) continue;
+        amounts[txn_count] = strtod(token, NULL);
+
+        token = strtok(NULL, ",");               if (!token) continue;
+        strncpy(dates[txn_count], token, MAX_DATE-1);
+        dates[txn_count][MAX_DATE-1] = '\0';
+        trim_newline(dates[txn_count]);
+
+        txn_count++;
+    }
+
+    fclose(f);
+    return 1;
 }
 
 int list_all() {
@@ -91,20 +123,25 @@ int save_csv() {
 }
 
 int displaymenu() {
-    printf("\n==== เมนู ====\n");
-    printf("1) แสดงทั้งหมด\n");
-    printf("2) เพิ่ม\n");
-    printf("3) ค้นหา\n");
-    printf("4) อัปเดตจำนวนเงิน\n");
-    printf("5) ลบตามบัญชี\n");
-    printf("6) บันทึกลงไฟล์\n");
-    printf("0) ออก\n");
-    printf("เลือก: ");
-    char buf[16]; if (!fgets(buf, sizeof(buf), stdin)) return -1;
-    return atoi(buf);
+
 }
 
 int main() {
+    if (!ensure_csv_has_header()) {
+        printf("Failed to ensure CSV header.\n");
+        return 1;
+    }
 
+    if (!load_csv()) {
+        printf("Failed to load CSV.\n");
+        return 1;
+    }
+
+    printf("Loaded %d transactions:\n", txn_count);
+    for (int i = 0; i < txn_count; ++i) {
+        printf("%s | %s | %.2f | %s\n", accounts[i], types[i], amounts[i], dates[i]);
+    }
+
+    return 0;
 }
 
