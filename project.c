@@ -1,18 +1,16 @@
 #include <stdio.h>
 #include <string.h>
 
-/* ===== CONFIG ===== */
+//config
 #define FILE_NAME "transactions.csv"
-
 #define MAX_TXNS  1000
 #define MAX_ACC   64
 #define MAX_TYPE  32
 #define MAX_DATE  32
-
 #define OK  1
 #define ERR 0
 
-/* ===== GLOBAL PARALLEL ARRAYS (no struct) ===== */
+//global arrays
 char   accounts[MAX_TXNS][MAX_ACC];
 char   types   [MAX_TXNS][MAX_TYPE];
 double amounts [MAX_TXNS];
@@ -113,7 +111,6 @@ int add(void) {
     return OK;
 }
 
-/* Search by Account or Type (exact match) */
 int search(void) {
     int choice;
     char key[64];
